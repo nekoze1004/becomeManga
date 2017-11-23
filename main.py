@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import os
 from numba import jit
+import datetime
 
 imgWidth = 960
 imgHeight = 540
@@ -77,7 +78,9 @@ if __name__ == "__main__":
             if isWaku(i, j):
                 koma[i, j] = 0
 
+    today = datetime.datetime.today()
+    print(today.strftime("%Y%m%d%H%M%S"))
     cv2.imshow("result", koma)
-    cv2.imwrite("result.png", koma)
+    cv2.imwrite("./result/" + today.strftime("%Y%m%d%H%M%S") + ".png", koma)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
