@@ -6,8 +6,8 @@ from numba import jit
 imgWidth = 960
 imgHeight = 540
 wakuWid = 5
-Height = imgHeight * 4 + wakuWid * 6
-Width = imgWidth + wakuWid * 2
+Height = imgHeight * 4
+Width = imgWidth
 
 path = r"./SS"
 
@@ -20,16 +20,17 @@ def imgMasking(base, mask, startX, startY):
     print(mask.shape)"""
     for i in range(mask.shape[0]):
         for j in range(mask.shape[1]):
-            print("mask:" + str(i) + "," + str(j))
-            print("base:" + str(startX) + "," + str(startY) + "\n")
+            """print("mask:" + str(i) + "," + str(j))
+            print("base:" + str(startX) + "," + str(startY) + "\n")"""
             base[startX, startY] = mask[i, j]
             startY += 1
         startY = y
         startX += 1
+    return startX
 
 
 if __name__ == "__main__":
-    koma = cv2.imread("./Koma/koma_half_black.png")
+    koma = np.empty((Height, Width, 3),np.uint8)
     print(koma.shape)
 
     dir = os.listdir(path)
@@ -46,17 +47,15 @@ if __name__ == "__main__":
         limit += 1
 
     count = 0
-    startX = int(wakuWid)
-    startY = int(wakuWid)
+    startX = 0
+    startY = 0
     for im in range(len(img_list)):
         print("aaa")
-        imgMasking(koma, img_list[im], startX, startY)
+        startX = imgMasking(koma, img_list[im], startX, startY)
+        print(startX)
         cv2.imshow(str(im), koma)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
-        count += 1
-        startX += imgHeight + wakuWid * count
-        print(str(count) + ":" + str(startX))
 
     cv2.imshow("result", koma)
     cv2.imwrite("result.png", koma)
