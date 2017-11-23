@@ -3,18 +3,20 @@ import numpy as np
 import os
 from numba import jit
 import datetime
+from tkinter.filedialog import *
 
 imgWidth = 960
 imgHeight = 540
 wakuWid = 10
-Height = imgHeight * 4
+komakazu = 4
+Height = imgHeight * komakazu
 Width = imgWidth
 
 path = r"./SS"
 
 
 def isWaku(i, j):
-    if i < wakuWid or i >= imgHeight * 4 - wakuWid or \
+    if i < wakuWid or i >= imgHeight * komakazu - wakuWid or \
                     j < wakuWid or j >= imgWidth - wakuWid:
         return True
     else:
@@ -45,6 +47,14 @@ def imgMasking(base, mask, startX, startY):
     return startX
 
 
+def fileSelect():
+    fType = [("*.jpg", "*.png")]
+    iDir = os.path.abspath(os.path.dirname(__file__ + "./SS"))
+    filename = askopenfilename(filetypes=fType, initialdir=iDir)
+    print(filename)
+    return filename
+
+
 if __name__ == "__main__":
     koma = np.empty((Height, Width, 3), np.uint8)
     print(koma.shape)
@@ -52,15 +62,13 @@ if __name__ == "__main__":
     dir = os.listdir(path)
     img_list = []
 
-    limit = 0
-    for file in dir:
-        if limit == 4:
+    for i in range(komakazu):
+        if i == 4:
             break
-        print(file)
-        img = cv2.imread(os.path.join(path, file))
+        file = fileSelect()
+        img = cv2.imread(file)
         img_mini = cv2.resize(img, (int(imgWidth), int(imgHeight)))
         img_list.append(img_mini)
-        limit += 1
 
     count = 0
     startX = 0
