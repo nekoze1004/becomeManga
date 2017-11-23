@@ -5,11 +5,26 @@ from numba import jit
 
 imgWidth = 960
 imgHeight = 540
-wakuWid = 5
+wakuWid = 10
 Height = imgHeight * 4
 Width = imgWidth
 
 path = r"./SS"
+
+
+def isWaku(i, j):
+    if i < wakuWid or i >= imgHeight * 4 - wakuWid or \
+                    j < wakuWid or j >= imgWidth - wakuWid:
+        return True
+    else:
+        return isNakaWaku(i, j)
+
+
+def isNakaWaku(i, j):
+    if imgHeight + wakuWid / 2 >= i > imgHeight - wakuWid / 2 or \
+                                            imgHeight * 2 + wakuWid / 2 >= i > imgHeight * 2 - wakuWid / 2 or \
+                                            imgHeight * 3 + wakuWid / 2 >= i > imgHeight * 3 - wakuWid / 2:
+        return True
 
 
 @jit
@@ -30,7 +45,7 @@ def imgMasking(base, mask, startX, startY):
 
 
 if __name__ == "__main__":
-    koma = np.empty((Height, Width, 3),np.uint8)
+    koma = np.empty((Height, Width, 3), np.uint8)
     print(koma.shape)
 
     dir = os.listdir(path)
@@ -53,9 +68,14 @@ if __name__ == "__main__":
         print("aaa")
         startX = imgMasking(koma, img_list[im], startX, startY)
         print(startX)
-        cv2.imshow(str(im), koma)
+        """cv2.imshow(str(im), koma)
         cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        cv2.destroyAllWindows()"""
+
+    for i in range(koma.shape[0]):
+        for j in range(koma.shape[1]):
+            if isWaku(i, j):
+                koma[i, j] = 0
 
     cv2.imshow("result", koma)
     cv2.imwrite("result.png", koma)
