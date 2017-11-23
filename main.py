@@ -55,6 +55,15 @@ def fileSelect():
     return filename
 
 
+def fileSelects():
+    fType = [("*.jpg", "*.png")]
+    iDir = os.path.abspath(os.path.dirname(__file__ + "./SS"))
+    filename = askopenfilenames(filetypes=fType, initialdir=iDir)
+    filelist = list(filename)
+    print(filelist)
+    return filelist
+
+
 if __name__ == "__main__":
     koma = np.empty((Height, Width, 3), np.uint8)
     print(koma.shape)
@@ -62,13 +71,18 @@ if __name__ == "__main__":
     dir = os.listdir(path)
     img_list = []
 
+    limit = 0
     for i in range(komakazu):
-        if i == 4:
+        if limit == komakazu:
             break
-        file = fileSelect()
-        img = cv2.imread(file)
-        img_mini = cv2.resize(img, (int(imgWidth), int(imgHeight)))
-        img_list.append(img_mini)
+        filelist = fileSelects()
+        for file in filelist:
+            if limit == komakazu:
+                break
+            img = cv2.imread(file)
+            img_mini = cv2.resize(img, (int(imgWidth), int(imgHeight)))
+            img_list.append(img_mini)
+            limit += 1
 
     count = 0
     startX = 0
