@@ -1,24 +1,27 @@
-import cv2
+import cv2, datetime, sys
 import numpy as np
-import os
-from numba import jit
-import datetime
 from tkinter.filedialog import *
-import sys
 
+# 画像一枚のサイズ
 imgWidth = 960
 imgHeight = 540
+
+# 枠の太さ
 wakuWid = 5
+
+# コマの数
 komakazu = 4
+
+# レイアウト1のサイズ
 Height1 = imgHeight * komakazu
 Width1 = imgWidth
 
+# レイアウト2のサイズ
 Height2 = imgHeight * 2
 Width2 = imgWidth * 2
 
-path = r"./SS"
 
-
+# レイアウト1の枠線の位置
 def isWaku1(i, j):
     if i < wakuWid or i >= Height1 - wakuWid or \
                     j < wakuWid or j >= Width1 - wakuWid:
@@ -27,6 +30,7 @@ def isWaku1(i, j):
         return isNakaWaku1(i, j)
 
 
+# レイアウト1の枠線の位置　なぜ分けた？
 def isNakaWaku1(i, j):
     if imgHeight + wakuWid / 2 >= i > imgHeight - wakuWid / 2 or \
                                             imgHeight * 2 + wakuWid / 2 >= i > imgHeight * 2 - wakuWid / 2 or \
@@ -34,6 +38,7 @@ def isNakaWaku1(i, j):
         return True
 
 
+# レイアウト2の枠線の位置
 def isWaku2(i, j):
     if i < wakuWid or i >= Height2 - wakuWid or \
                     j < wakuWid or j >= Width2 - wakuWid:
@@ -42,15 +47,15 @@ def isWaku2(i, j):
         return isNakawaku2(i, j)
 
 
+# レイアウト2の枠線の位置
 def isNakawaku2(i, j):
     if imgHeight + wakuWid / 2 >= i > imgHeight - wakuWid / 2 or \
                                     imgWidth + wakuWid / 2 >= j > imgWidth - wakuWid / 2:
         return True
 
 
-@jit
+# レイアウト1で画像を繋げていく関数
 def imgMasking1(base, mask, startX, startY):
-    print("bb")
     y = startY
     """print(base.shape)
     print(mask.shape)"""
@@ -65,8 +70,8 @@ def imgMasking1(base, mask, startX, startY):
     return startX
 
 
+# レイアウト2で画像を繋げていく関数
 def imgMasking2(base, mask, startX, startY):
-    print("cc")
     y = startY
     """print(base.shape)
     print(mask.shape)"""
@@ -80,6 +85,7 @@ def imgMasking2(base, mask, startX, startY):
         startX += 1
 
 
+# GUIでファイル選択する　ファイルパスが入ったリストが返される
 def fileSelects():
     fType = [("*.jpg", "*.png")]
     iDir = os.path.abspath(os.path.dirname(__file__ + "./SS"))
@@ -89,6 +95,7 @@ def fileSelects():
     return filelist
 
 
+# ファイルの保存とプレビューを行う関数
 def fileWrite(koma):
     today = datetime.datetime.today()
     print(today.strftime("%Y%m%d%H%M%S"))
@@ -98,71 +105,89 @@ def fileWrite(koma):
     cv2.destroyAllWindows()
 
 
+# めいん　ごちゃごちゃしすぎ　書き直したい
 if __name__ == "__main__":
     print("コマのタイプを選べ 1 or 2")
     komaType = input(">>> ")
 
-    dir = os.listdir(path)
+    # 画像を入れるリスト
     img_list = []
 
+    # 画像を4つ選ばせる 3つでも5つでもダメだ きっちり4つ
     limit = 0
     for i in range(komakazu):
+        # 冗長？
         if limit == komakazu:
             break
         filelist = fileSelects()
+        # fileSelects()から帰ってきたリストの中身を回す
         for file in filelist:
+            # コマ数と同じ数の画像を取得したら抜け出す
             if limit == komakazu:
                 break
             img = cv2.imread(file)
+            # リサイズしてる　スクショの元サイズだとデカすぎて見づらい
             img_mini = cv2.resize(img, (int(imgWidth), int(imgHeight)))
             img_list.append(img_mini)
             limit += 1
-    print("aaa")
-    print(type(komaType))
+
+    # レイアウト1
     if int(komaType) == 1:
         print("1")
+
+        # 受け皿を作る
         koma1 = np.empty((Height1, Width1, 3), np.uint8)
-        print(koma1.shape)
 
         startX = 0
-        startY = 0
+        startY = 0  # こいつ要らないかもしれない
         for im in range(len(img_list)):
+            # startXは1080→2160→3240となるはず
             startX = imgMasking1(koma1, img_list[im], startX, startY)
-            print(startX)
 
+        # 枠線つける
         for i in range(koma1.shape[0]):
             for j in range(koma1.shape[1]):
                 if isWaku1(i, j):
                     koma1[i, j] = 0
 
+        # ファイルを保存して終了する
         fileWrite(koma1)
         sys.exit()
 
+    # レイアウト2
     elif int(komaType) == 2:
+        print("2")
+        # 受け皿を作る
         koma2 = np.empty((Height2, Width2, 3), np.uint8)
-        print(koma2.shape)
 
+        # 画像を中央で4分割して、
+        # 第一象限、第二象限、第四象限、第三象限の順に画像を配置する
         count = 0
+        # 第一象限
         startX = 0
         startY = imgWidth
         for im in range(len(img_list)):
             imgMasking2(koma2, img_list[im], startX, startY)
             count += 1
             if count == 1:
+                # 第二象限
                 startX = imgHeight
                 startY = imgWidth
             elif count == 2:
+                # 第四象限
                 startX = 0
                 startY = 0
             elif count == 3:
+                # 第三象限
                 startX = imgHeight
                 startY = 0
-            print(count)
 
+        # 枠線をつける
         for i in range(koma2.shape[0]):
             for j in range(koma2.shape[1]):
                 if isWaku2(i, j):
                     koma2[i, j] = 0
 
+        # ファイルを保存して終了する
         fileWrite(koma2)
         sys.exit()
