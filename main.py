@@ -88,7 +88,8 @@ def imgMasking2(base, mask, startX, startY):
 # GUIでファイル選択する　ファイルパスが入ったリストが返される
 def fileSelects():
     fType = [("*.jpg", "*.png")]
-    iDir = os.path.abspath(os.path.dirname(__file__ + "./SS"))
+    iDir = os.path.abspath(os.path.dirname(__file__) + "/SS")
+    print(iDir)
     filename = askopenfilenames(filetypes=fType, initialdir=iDir)
     filelist = list(filename)
     print(filelist)
@@ -104,9 +105,19 @@ def fileWrite(koma):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
+# 初期化？　保存先と探索先が無いなら作る
+def initialize():
+    if not (os.path.exists("./result")):
+        os.mkdir("./result")
+
+    if not (os.path.exists("./SS")):
+        os.mkdir("./SS")
+
 
 # めいん　ごちゃごちゃしすぎ　書き直したい
 if __name__ == "__main__":
+    print(__file__)
+    initialize()
     print("コマのタイプを選べ 1 or 2")
     komaType = input(">>> ")
 
