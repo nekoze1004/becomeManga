@@ -3,7 +3,6 @@ import numpy as np
 from tkinter.filedialog import *
 from tqdm import tqdm
 
-
 # 画像一枚のサイズ
 imgWidth = 960
 imgHeight = 540
@@ -36,10 +35,9 @@ def isWaku1(i, j):
 
 # レイアウト1の枠線の位置　なぜ分けた？
 def isNakaWaku1(i, j):
-    if imgHeight + wakuWid / 2 >= i > imgHeight - wakuWid / 2 or \
-                                            imgHeight * 2 + wakuWid / 2 >= i > imgHeight * 2 - wakuWid / 2 or \
-                                            imgHeight * 3 + wakuWid / 2 >= i > imgHeight * 3 - wakuWid / 2:
-        return True
+    for k in range(komakazu):
+        if imgHeight * k + wakuWid / 2 >= i > imgHeight * k - wakuWid / 2:
+            return True
 
 
 # レイアウト1で画像を繋げていく関数
@@ -90,26 +88,71 @@ def initialize():
 # 入力された文字列はexitではないか
 def isNotExit(Mess):
     global first
-    if first:
-        first = False
-        print("First")
+    print(Mess)
+    inputStr = input(">>> ")
+    if inputStr == "e":
+        print("exit")
+        return False
+    elif inputStr == "c":
+        config()
         return True
     else:
-        print(Mess)
-        inputStr = input(">>> ")
-        if inputStr == "e":
-            print("exit")
-            return False
+        print("loop")
+        return True
+
+
+def printConfig():
+    global imgHeight, imgWidth, Height1, Width1, wakuWid, komakazu
+    print("-----現在の設定-----")
+    print("縦:" + str(imgHeight))
+    print("横:" + str(imgWidth))
+    print("マンガサイズ:" + str(Height1) + "," + str(Width1))
+    print("枠の太さ:" + str(wakuWid))
+    print("コマの数:" + str(komakazu))
+    print("--------------------")
+
+
+def config():
+    global imgHeight, imgWidth, Height1, Width1, wakuWid, komakazu
+
+    flg = True
+    while (flg):
+        print("""設定画面\n画像サイズ変更：i\n枠の太さ変更：w\nコマの数:k\n設定の確認:m\n終わる：end""")
+        com = input(">>> ")
+        if com == "i":
+            print("縦")
+            inputH = input(">>> ")
+            imgHeight = int(inputH)
+            print("横")
+            inputW = input(">>> ")
+            imgWidth = int(inputW)
+            Height1 = imgHeight * komakazu
+            Width1 = imgWidth
+            printConfig()
+        elif com == "w":
+            print("枠の太さ")
+            inputWW = input(">>> ")
+            wakuWid = int(inputWW)
+            printConfig()
+        elif com == "k":
+            print("コマの数")
+            inputK = input(">>> ")
+            komakazu = int(inputK)
+            Height1 = imgHeight * komakazu
+            printConfig()
+        elif com == "m":
+            printConfig()
+        elif com == "end":
+            flg = False
         else:
-            print("loop")
-            return True
+            print("出直せ")
 
 
 # めいん　ごちゃごちゃしすぎ　書き直したい
 if __name__ == "__main__":
     initialize()
 
-    while (isNotExit("止めるならeって打て")):
+    while (isNotExit("止めるならe 設定はc")):
 
         # 画像を入れるリスト
         img_list = []
