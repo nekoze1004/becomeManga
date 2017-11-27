@@ -1,6 +1,8 @@
 import cv2, datetime, sys
 import numpy as np
 from tkinter.filedialog import *
+from tqdm import tqdm
+
 
 # 画像一枚のサイズ
 imgWidth = 960
@@ -45,7 +47,7 @@ def imgMasking1(base, mask, startX, startY):
     y = startY
     """print(base.shape)
     print(mask.shape)"""
-    for i in range(mask.shape[0]):
+    for i in tqdm(range(mask.shape[0])):
         for j in range(mask.shape[1]):
             """print("mask:" + str(i) + "," + str(j))
             print("base:" + str(startX) + "," + str(startY) + "\n")"""
@@ -69,7 +71,7 @@ def fileSelects():
 # ファイルの保存とプレビューを行う関数
 def fileWrite(koma):
     today = datetime.datetime.today()
-    print(today.strftime("%Y%m%d%H%M%S"))
+    # print(today.strftime("%Y%m%d%H%M%S"))
     cv2.imshow("result", koma)
     cv2.imwrite("./result/" + today.strftime("%Y%m%d%H%M%S") + ".png", koma)
     cv2.waitKey(0)
@@ -154,7 +156,7 @@ if __name__ == "__main__":
             startX = imgMasking1(koma1, img_list[im], startX, startY)
 
         # 枠線つける
-        for i in range(koma1.shape[0]):
+        for i in tqdm(range(koma1.shape[0])):
             for j in range(koma1.shape[1]):
                 if isWaku1(i, j):
                     koma1[i, j] = 0
