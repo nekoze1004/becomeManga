@@ -3,6 +3,10 @@ import numpy as np
 from tkinter.filedialog import *
 from tqdm import tqdm
 
+from pydrive.auth import GoogleAuth
+from pydrive.drive import GoogleDrive
+import qrcode
+
 # 画像一枚のサイズ
 imgWidth = 960
 imgHeight = 540
@@ -22,6 +26,8 @@ firstImg_Flg = False
 
 # 一回目の起動か
 first = True
+
+drive = GoogleDrive
 
 
 # レイアウト1の枠線の位置
@@ -71,13 +77,43 @@ def fileWrite(koma):
     today = datetime.datetime.today()
     # print(today.strftime("%Y%m%d%H%M%S"))
     cv2.imshow("result", koma)
-    cv2.imwrite("./result/" + today.strftime("%Y%m%d%H%M%S") + ".png", koma)
+    imgName = "./result/" + today.strftime("%Y%m%d%H%M%S")
+    cv2.imwrite(imgName + ".png", koma)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+    url = uploadImg(imgName)
+    makeQR(url, imgName)
+
+
+def AuthDrive():
+    global drive
+    # GoogleDrive使っていいかい？って認証
+    gauth = GoogleAuth()
+    gauth.CommandLineAuth()
+    drive = GoogleDrive(gauth)
+
+
+# GoogleDriveにimgをアップロードする
+# https://drive.google.com/open?id=hogehogeを返す
+def uploadImg(imgName):
+    f = drive.CreateFile({"title": imgName + ".png", "mineType": "image/png"})
+    f.SetContentFile(imgName + ".png")
+    f.Upload()
+    url = "https://drive.google.com/open?id=" + f["id"]
+    return url
+
+
+# QRコードを生成して見せる
+def makeQR(url,fName):
+    print(url)
+    qr = qrcode.make(url)
+    qr.show()
+    qr.save(fName + "QR.png")
 
 
 # 初期化？　保存先と探索先が無いなら作る
 def initialize():
+    AuthDrive()
     if not (os.path.exists("./result")):
         os.mkdir("./result")
 

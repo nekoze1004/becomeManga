@@ -1,0 +1,9 @@
+
+*.json
+*.yaml
+
+result/
+Koma/
+SS/
+makeKoma.py
+TestTKinter.py
