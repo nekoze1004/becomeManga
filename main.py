@@ -7,6 +7,8 @@ from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 import qrcode
 
+import webbrowser
+
 # 画像一枚のサイズ
 imgWidth = 960
 imgHeight = 540
@@ -27,7 +29,11 @@ firstImg_Flg = False
 # 一回目の起動か
 first = True
 
+# GoogleDriveのあれ（どれ）
 drive = GoogleDrive
+
+# GoogleDriveのフォルダID
+folderID = "1s6KhWJirHqmNnJzKhWVJClpqVX-nM0yX"
 
 
 # レイアウト1の枠線の位置
@@ -76,12 +82,10 @@ def fileSelects():
 def fileWrite(koma):
     today = datetime.datetime.today()
     # print(today.strftime("%Y%m%d%H%M%S"))
-    cv2.imshow("result", koma)
     imgName = "./result/" + today.strftime("%Y%m%d%H%M%S")
     cv2.imwrite(imgName + ".png", koma)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
     url = uploadImg(imgName)
+    webbrowser.open(url)
     makeQR(url, imgName)
 
 
@@ -96,7 +100,10 @@ def AuthDrive():
 # GoogleDriveにimgをアップロードする
 # https://drive.google.com/open?id=hogehogeを返す
 def uploadImg(imgName):
-    f = drive.CreateFile({"title": imgName + ".png", "mineType": "image/png"})
+    global folderID
+    f = drive.CreateFile({"title": imgName + ".png",
+                          "mineType": "image/png",
+                          "parents": [{"kind": "drive#fileLink", "id": folderID}]})
     f.SetContentFile(imgName + ".png")
     f.Upload()
     url = "https://drive.google.com/open?id=" + f["id"]
@@ -104,7 +111,7 @@ def uploadImg(imgName):
 
 
 # QRコードを生成して見せる
-def makeQR(url,fName):
+def makeQR(url, fName):
     print(url)
     qr = qrcode.make(url)
     qr.show()
